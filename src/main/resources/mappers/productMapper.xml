@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb16S.dao.ProductDAO">
+	<select id="getProductList" resultType="com.spring.javaweb16S.vo.DbProductVO">
+		 <if test='part == "전체"'>
+  		select * from dbProduct order by idx desc limit #{startIndexNo},#{pageSize};
+  	</if>
+    <if test='part != "전체"'>
+  		select product.*, sub.categorySubName from dbProduct product, categorySub sub 
+  		where sub.categorySubName = #{part} and substring(product.productCode,4,3)=sub.categorySubCode order by idx desc limit #{startIndexNo},#{pageSize};  		 
+  	</if>
+	</select>
+	<select id="totRecCnt" resultType="int">
+		select count(*) from dbProduct;
+	</select>
+	
+	<select id="partRecCnt" resultType="int">
+		SELECT COUNT(*)	FROM dbProduct AS d	JOIN categorySub AS c ON d.categorySubCode = c.categorySubCode	WHERE c.categorySubName = #{section};
+	</select>
+	
+	<select id="getDbShopProduct" resultType="com.spring.javaweb16S.vo.DbProductVO">
+  	SELECT b.*, c.idx AS brendContentIdx, c.brend, c.disingenuous, c.recipe, c.size
+		FROM dbProduct AS b 
+		LEFT JOIN dbProductContent AS c ON b.idx = c.pro_idx
+		WHERE b.idx = #{idx};
+  </select>
+  
+  <select id="getProductDetailedShow" resultType="com.spring.javaweb16S.vo.DbProductVO">
+  		SELECT b.*, c.* 
+			FROM dbProduct AS b 
+			LEFT JOIN dbProductContent AS c ON b.idx = c.pro_idx
+			WHERE b.idx = #{idx};
+  </select>
+  
+  <select id="getDbCartProductOptionSearch" resultType="com.spring.javaweb16S.vo.DbCartVO">
+  	select * from dbCart where productName=#{productName} and optionName=#{optionName} and mid=#{mid};
+  </select>
+  
+  
+   <select id="getDbShopOptionShow" resultType="com.spring.javaweb16S.vo.DbOptionVO">
+  	select * from dbOption where productIdx = #{idx} order by idx;
+  </select>
+  
+	<select id="getDbCartList" resultType="com.spring.javaweb16S.vo.DbCartVO">
+  	select * from dbCart where mid=#{mid} order by idx;
+  </select>
+	
+	<select id="getOrderMaxIdx" resultType="com.spring.javaweb16S.vo.DbOrderVO">
+  	select max(idx) as maxIdx from dbOrder;
+  </select>
+  
+  <select id="getCartIdx" resultType="com.spring.javaweb16S.vo.DbCartVO">
+  	select * from dbCart where idx = #{idx};
+  </select>
+  
+  <select id="getBaesongList" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+  	select * from dbBaesong where mid = #{mid};
+  </select>
+  
+  <select id="getProductItemSearch" resultType="com.spring.javaweb16S.vo.DbProductVO">
+  	SELECT * FROM dbProduct WHERE productName LIKE CONCAT('%', #{itemSearch}, '%');
+  </select>
+  
+	<select id="getProductMaxIdx" resultType="com.spring.javaweb16S.vo.DbProductVO">
+  	select * from dbProduct order by idx desc limit 1;
+  </select>
+  
+	<select id="getDeliveryUpdate" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+  	select * from dbBaesong where mid = #{mid};
+  </select>
+  
+	<select id="getDbBaesongListShow" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+  	SELECT * FROM dbBaesong ORDER BY CASE orderStatus WHEN '결제완료' THEN 1 WHEN '배송중' THEN 2 WHEN '배송완료' THEN 3 ELSE 4 END;
+  </select>
+			
+	<select id="setCustomerReturns" resultType="int">
+	  SELECT COUNT(*) FROM dbBaesong WHERE mid = #{vo.mid} AND orderIdx = #{vo.productCode}
+	</select>
+	
+	<select id="getAdminHomeSubTitleShow" resultType="int">
+	  SELECT count(*) FROM subTitle WHERE homeSubTitle = #{homeSubTitle};
+	</select>
+	
+	
+	<select id="productLikeCheck" resultType="boolean">
+	  SELECT EXISTS(SELECT 1 FROM likeGood WHERE productIdx = #{idx} AND memberMid = #{mid});
+	</select>
+	
+	<select id="getMyClaimList" resultType="com.spring.javaweb16S.vo.ReturnsVO">
+	  SELECT * from returns where mid =#{mid};
+	</select>
+	
+	<select id="getLoveProductList" resultType="com.spring.javaweb16S.vo.DbProductVO">
+	  <if test='part == "전체"'>
+  		SELECT * FROM dbProduct WHERE idx IN (SELECT productIdx FROM likeGood WHERE memberMid = #{mid});
+  		
+  		<!-- SELECT * FROM dbProduct WHERE idx IN (
+  					SELECT productIdx FROM likeGood WHERE memberMid = #{mid}
+					) LIMIT #{startIndexNo}, #{pageSize};-->
+  	</if>
+    <if test='part != "전체"'>
+  		select product.*, sub.categorySubName from dbProduct product, categorySub sub 
+  		  where sub.categorySubName = #{part} and substring(product.productCode,4,3)=sub.categorySubCode order by idx desc;
+  	</if>
+	</select>
+	
+	<select id="getProductBrendList" resultType="com.spring.javaweb16S.vo.DbProductVO">
+	  <if test='part == "전체"'>
+  		SELECT *
+			FROM dbProduct
+			JOIN dbProductContent ON dbProduct.idx = dbProductContent.pro_idx;
+  	</if>
+	</select>
+	
+	<select id="getProductEventList" resultType="com.spring.javaweb16S.vo.DbProductVO">
+	  <if test='part == "전체"'>
+			SELECT * FROM dbProduct where salePercent <![CDATA[>=]]> 40;
+  	</if>
+	</select>
+	
+	<select id="getIntairastoryList" resultType="com.spring.javaweb16S.vo.IntairastoryVO">
+	  select * from intaria;
+	</select>
+	
+	<select id="getIntairastoryPosiction" resultType="int">
+	  select count(*) from intaria where posication= #{posiction};
+	</select>
+	
+	<select id="getCuponList" resultType="com.spring.javaweb16S.vo.CuponVO">
+	  SELECT * FROM coupons;
+	</select>
+	
+	<select id="getReviewSerchProduct" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+	  SELECT * FROM dbBaesong WHERE idx=#{idx} AND mid=#{mid};
+	</select>
+	
+	<select id="getBrendrecipe" resultType="com.spring.javaweb16S.vo.BrendVO">
+	  SELECT * FROM dbProductContent WHERE idx=#{vo.brendContentIdx};
+	</select>
+	
+	<select id="getProductReviewList" resultType="com.spring.javaweb16S.vo.ReviewVO">
+	 SELECT r.*,
+       d.orderIdx,
+       d.productName,
+       d.optionName,
+       d.optionNum,
+       d.mid,
+       p.detail,
+       d.idx AS oridx,
+       p.idx AS productIdx
+		FROM review AS r
+		LEFT JOIN dborder AS d ON r.baesongoIdx = d.idx
+		LEFT JOIN dbproduct AS p ON p.idx = d.productIdx
+		WHERE p.idx = #{idx};
+
+	</select>
+<!-- 	
+	<select id="getCouponList" resultType="com.spring.javaweb16S.vo.CuponVO">
+	  SELECT *
+		FROM coupons
+		WHERE couponCode = #{couponUS}
+	  AND couponStu = 'NO'
+	  AND (couponMid != #{mid} OR couponMid IS NULL) 
+	  HAVING COUNT(couponMid != #{mid} OR NULL) &lt; 2;
+	</select>
+
+ -->
+	<select id="getBaesongReturn" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+	  SELECT * FROM dbBaesong WHERE orderIdx = #{returnCategoryCode};
+	</select>
+	
+	
+	
+	
+	<insert id="dbShopCartInput">
+    insert into dbCart values (default,default,#{vo.mid},#{vo.productIdx},#{vo.productName},#{vo.mainPrice},#{vo.thumbImg},#{vo.optionIdx},#{vo.optionName},#{vo.optionPrice},#{vo.optionNum},#{vo.totalPrice});
+  </insert>
+	<insert id="setDbOrder">
+    insert into dbOrder values (default,#{vo.orderIdx},#{vo.mid},#{vo.productIdx},default,#{vo.productName},#{vo.mainPrice},#{vo.thumbImg},#{vo.optionName},#{vo.optionPrice},#{vo.optionNum},#{vo.totalPrice});
+  </insert>
+	<insert id="setDbBaesong">
+		<if test="baesongVO.membership != null">
+    	insert into dbBaesong values (default,#{baesongVO.oidx},#{baesongVO.orderIdx},#{baesongVO.orderTotalPrice},#{baesongVO.mid},#{baesongVO.name},#{baesongVO.address},#{baesongVO.tel},#{baesongVO.message},#{baesongVO.payment},#{baesongVO.payMethod},default,#{baesongVO.baesongImg},#{baesongVO.membership},#{baesongVO.membershipPrice});
+    </if>
+    <if test="baesongVO.membership == null">
+    	insert into dbBaesong values (default,#{baesongVO.oidx},#{baesongVO.orderIdx},#{baesongVO.orderTotalPrice},#{baesongVO.mid},#{baesongVO.name},#{baesongVO.address},#{baesongVO.tel},#{baesongVO.message},#{baesongVO.payment},#{baesongVO.payMethod},default,#{baesongVO.baesongImg},'미사용',0);
+    </if>
+  </insert>
+  
+	<insert id="setAdminHomeSubTitle">
+		insert into subTitle values (default,#{homeSubTitle},#{homeSubTitleText});
+	</insert>
+	
+	<insert id="setAdminReport">
+    insert into returns values (default,#{vo.mid},#{vo.productCode},#{vo.email},#{vo.fName},#{vo.category},#{vo.message},default,default,default);
+  </insert>
+	
+	<insert id="insertListGood">
+     INSERT INTO likeGood VALUES (DEFAULT,#{idx},#{mid}); 
+  </insert>
+  
+	<insert id="setIntariaUploadUpdateOk">
+    INSERT INTO intaria VALUES (DEFAULT, #{saveFileName}, #{posiction});
+	</insert>
+
+	
+	
+
+	
+	
+	
+	<update id="setUpdateProductStock">
+		<foreach item="item" collection="orderVOS" separator=";">
+			UPDATE dbProductContent SET recipe = recipe - #{item.optionNum} WHERE pro_idx = #{item.productIdx} 
+		</foreach>
+	</update>
+	
+	<update id="dbShopCartUpdate">
+    update dbCart set optionNum=#{vo.optionNum},totalPrice=totalPrice+#{vo.totalPrice} where productName=#{vo.productName} and optionName=#{vo.optionName};
+  </update>
+	<update id="setMemberPointPlus">
+    update spmember set point = point + #{point} where mid = #{mid};
+  </update>
+  
+	<update id="setUploadOk">
+    update dbProduct set fSName = #{vo.fSName} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminProductNameUpdate">
+    update dbProduct set productName = #{productNameUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminDetailUpdate">
+    update dbProduct set detail = #{productDetailUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminSalePriceUpdate">
+    update dbProduct set salePrice = #{salePriceUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminMainPriceUpdate">
+    update dbProduct set mainPrice = #{mainPriceUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminProductDelUpdate">
+    update dbProduct set productDel= #{productDelUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminSaleUpdate">
+    update dbProduct set sale= #{saleUpdate} where idx = #{idx};
+  </update>
+  
+	<update id="setAdminSalePercentUpdate">
+    UPDATE dbProduct SET salePercent = #{salePercentUpdate}, mainPrice = #{mainPriceSalePercent}, salePrice = #{salePrice} WHERE idx = #{idx};
+  </update>
+  
+	<update id="setDbProductInput">
+		UPDATE dbProduct SET content = #{content} where idx = #{idx}	
+	</update>
+	
+	<update id="setAdminOptionUpdate">
+		UPDATE dbOption SET optionName =#{optionNameUpdate} , optionPrice = #{optionPriceUpdate}  where idx = #{idx}	
+	</update>
+	
+	<update id="setAdminBrendUpdateUpdate">
+		UPDATE dbProductContent SET brend = #{productContentBrend}, disingenuous = #{productContentDisingenous}, recipe = #{productContentRecipe}, size = #{productContentSize} where pro_idx =#{productContentIdx};
+	</update>
+	
+	<update id="setDeliveryUpdateMember">
+		UPDATE dbBaesong SET name = #{vo.name}, tel = #{vo.tel}, message = #{vo.message} where idx =#{vo.idx};
+	</update>
+	
+	<update id="setDeliveryUpdateAddress">
+		UPDATE dbBaesong SET address=#{address} where idx =#{idx};
+	</update>
+	
+	<update id="setAdminHomeSubTitleUpdate">
+		UPDATE subTitle SET homeSubTitleText=#{homeSubTitleText} where homeSubTitle =#{homeSubTitle};
+	</update>
+	
+	<update id="setIntariaUpdateOk">
+		UPDATE intaria SET photo = #{saveFileName} where posication =#{posiction};
+	</update>
+	
+	<update id="setBrendRepice">
+		UPDATE dbProductContent SET recipe = recipe - #{vo.optionNum} where idx = #{vo.brendContentIdx};
+	</update>
+	
+	<update id="setProductStusUpdate">
+		UPDATE dbProduct SET productDel ='YES' where idx = #{productIdx};
+	</update>
+	
+	<update id="setBaesongStutesUpdate">
+		UPDATE dbBaesong SET orderStatus ='반품완료' where orderIdx = #{orderIdx};
+	</update>
+	
+	<update id="setReturnStutesUpdate">
+		UPDATE returns SET returnStus ='반품완료' , reMessage = '불편을 끼쳐드려 죄송합니다 정상적으로 처리해드렸습니다' where productCode = #{orderIdx};
+	</update>
+	
+	<!-- <update id="setCouponUS">
+		UPDATE coupons
+		SET couponStu = 'YES', couponMid = ${mid}
+		WHERE couponCode = #{couponUS};
+	</update> -->
+	
+	<!-- <update id="updateCouponAmount" parameterType="String">
+	  UPDATE coupons
+	  SET couponAmount = (SELECT couponAmount FROM coupons WHERE couponMid &lt;&gt; #{mid}),
+	      couponMid = #{mid}
+	  WHERE couponMid &lt;&gt; #{mid}
+	</update>
+ -->
+
+
+
+	
+	
+	<delete id="setDbCartDeleteAll">
+    delete from dbCart where idx = #{idx};
+  </delete>
+	<delete id="setProductDelete">
+    delete from dbProduct where idx = #{item};
+  </delete>
+  
+  <delete id="deleteListGood">
+     DELETE FROM likeGood WHERE productIdx = #{idx} AND memberMid = #{mid};
+   </delete>
+</mapper>

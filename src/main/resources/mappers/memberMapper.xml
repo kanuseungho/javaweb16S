@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb16S.dao.MemberDAO">
+
+	<select id="getMemberIdCheck" resultType="com.spring.javaweb16S.vo.MemberVO">
+		select * from spmember where mid = #{mid};
+	</select> 
+	
+	 <select id="totRecCnt" resultType="int">
+    select count(*) from spmember <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if>;
+  </select>
+	<select id="getMemberNickCheck" resultType="com.spring.javaweb16S.vo.MemberVO">
+		select * from spmember where nickName = #{nickName};
+	</select>
+	<select id="getMemberIdSerch" resultType="com.spring.javaweb16S.vo.MemberVO">
+    SELECT * FROM spmember WHERE name=#{name} AND nickName=#{nickName} AND email=#{email}
+	</select>
+	<select id="getMemberInfo" resultType="com.spring.javaweb16S.vo.MemberVO">
+    SELECT * FROM spmember WHERE mid=#{mid};
+	</select>
+	<select id="getAdminMemberList" resultType="com.spring.javaweb16S.vo.MemberVO">
+    select * from spmember <if test="mid != ''"> where mid like concat('%',#{mid},'%') </if> order by idx desc limit #{startIndexNo},#{pageSize}; 
+	</select>
+	<select id="getAdminMemberUser" resultType="com.spring.javaweb16S.vo.MemberVO">
+    select * from spmember where idx =#{idx}; 
+	</select>
+	
+	<select id="getAdminMemberUserBaesong" resultType="com.spring.javaweb16S.vo.DbBaesongVO">
+    select * from dbBaesong where mid=#{mid}; 
+	</select>
+	
+	<select id="getAdminMemberUserCart" resultType="com.spring.javaweb16S.vo.DbCartVO">
+    select * from dbCart where mid =#{mid}; 
+	</select>
+	<select id="getMemberNickNameEmailCheck" resultType="com.spring.javaweb16S.vo.MemberVO">
+  	select * from spmember where nickName = #{nickName} and email = #{email};
+  </select>
+	
+	
+	
+	
+	<insert id="setMemberJoinOk">
+    insert into spmember values (default,#{vo.mid},#{vo.pwd},#{vo.nickName},#{vo.name},#{vo.gender},#{vo.birthday},#{vo.tel},#{vo.email},#{vo.photo},default,default,default,default,default,default);
+  </insert>
+  
+  <insert id="setKakaoMemberInputOk">
+  	insert into spmember values (default,#{mid},#{pwd},#{nickName},'','남자',now(),'010- - ',#{email},'',default,default,default,default,default,default);
+  </insert>
+  
+  
+  
+	<update id="setMemberPwdUpdate">
+    update spmember set pwd = #{pwd} where mid = #{mid};
+  </update>
+
+	 <update id="setMemberVisitProcess">
+  	update spmember set visitCnt=visitCnt+1, todayCnt=todayCnt+1, point=point+1000 where mid = #{vo.mid};
+  </update>
+  
+  <update id="setMemberUpdate">
+  	update spmember set photo =#{vo.photo} , name=#{vo.name}, tel =#{vo.tel}, email=#{vo.email}, birthday=#{vo.birthday}, gender=#{vo.gender} where idx= #{idx};
+  </update>
+  
+  <update id="setMemberDelete">
+  	update spmember set userDel = "Ok" where mid =#{mid}
+  </update>
+
+	<update id="setMemberUserDelCheck">
+  	update spmember set userDel='NO' where mid = #{mid};
+  </update>
+  
+	<update id="setMemberPointUS">
+  	update spmember set point= point - #{resPoint} where mid = #{mid};
+  </update>
+  
+	<update id="setMemberPointReturn">
+  	UPDATE spmember SET point = point + (#{baesongVO.membershipPrice} - (#{baesongVO.orderTotalPrice} * 0.1)) WHERE mid = #{baesongVO.mid};
+  </update>
+
+
+
+
+	<delete id="setAdminMemberDeleteOne">
+	  delete from spmember where idx = #{item};
+	</delete>
+
+
+  
+</mapper>

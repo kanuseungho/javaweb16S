@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javaweb16S.dao.AdminDAO">	
+	<select id="getUploadCheck" resultType="com.spring.javaweb16S.vo.BannerVO">
+    select * from banner where photoPosition = #{vo.photoPosition};
+	</select>
+	
+	<select id="getImageBanner" resultType="com.spring.javaweb16S.vo.BannerVO">
+		 SELECT  b.*, p.*	FROM banner AS b LEFT JOIN dbProduct AS p ON b.photoRoute = p.idx
+	</select>
+	
+	
+	<select id="getTopBanner" resultType="com.spring.javaweb16S.vo.NoticeVO">
+    SELECT * FROM notice ORDER BY idx DESC LIMIT 1;
+	</select>
+	
+	<select id="getTitleShow" resultType="com.spring.javaweb16S.vo.SubTitleVO">
+    select * from subTitle;
+	</select>
+	
+	<select id="getAdminReturnList" resultType="com.spring.javaweb16S.vo.ReturnsVO">
+    select * from returns;
+	</select>
+	
+	<select id="getCouponMemberSerch" resultType="com.spring.javaweb16S.vo.CuponVO">
+    select * from coupons where couponCode = #{code} and couponMid = #{mid} and couponStu = 'NO'; 
+	</select>
+	
+	<select id="getCouponMemberInsertSerch" resultType="com.spring.javaweb16S.vo.CuponVO">
+    select * from coupons where idx = #{idx};
+	</select>
+
+	
+	 <!-- getMemberChart 쿼리 정의 -->
+    <select id="getMemberChart" resultType="com.spring.javaweb16S.vo.MemberVO">
+     	SELECT date_list.visitDate, COUNT(spmember.visitCnt) AS visitCount
+			FROM (
+			    SELECT DATE_SUB(CURDATE(), INTERVAL 20 DAY) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS visitDate
+			    FROM (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
+			    CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
+			    CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
+			    WHERE DATE_SUB(CURDATE(), INTERVAL 20 DAY) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY <![CDATA[<=]]> CURDATE()
+			) AS date_list
+			LEFT JOIN spmember ON DATE(spmember.startDate) <![CDATA[<=]]> date_list.visitDate
+			GROUP BY date_list.visitDate
+			ORDER BY date_list.visitDate
+    </select>
+    
+	
+	<select id="getProductMainVOS" resultType="com.spring.javaweb16S.vo.DbProductVO">
+		select * from dbProduct;
+	</select>
+	
+
+	<select id="getProductChart" resultType="com.spring.javaweb16S.vo.DbProductVO">
+  	SELECT categorySubCode, COUNT(*) AS count FROM dbProduct WHERE categorySubCode IN
+	  <foreach collection="productVOS" item="productVO" separator="," open="(" close=")">
+	    #{productVO.categorySubCode}
+	  </foreach>
+	  GROUP BY categorySubCode;
+	</select>
+
+	<select id="setMemberTypingList" resultType="com.spring.javaweb16S.vo.MemberVO">
+		<if test="searchFilter == 'mid'">
+			SELECT * FROM spmember WHERE mid LIKE CONCAT('%', #{searchInput}, '%');
+		</if>
+		<if test="searchFilter == 'nickName'">
+			SELECT * FROM spmember WHERE nickName LIKE CONCAT('%', #{searchInput}, '%');
+		</if>
+		<if test="searchFilter == 'name'">
+			SELECT * FROM spmember WHERE name LIKE CONCAT('%', #{searchInput}, '%');
+		</if>
+	</select>
+	
+	<select id="setMemberDateList" resultType="com.spring.javaweb16S.vo.MemberVO">
+		<if test="startDate != endDate">
+			SELECT * FROM spmember WHERE startDate BETWEEN #{startDate} AND #{endDate};
+		</if>
+		<if test="startDate == endDate">
+			SELECT * FROM spmember WHERE startDate BETWEEN #{startDate} AND DATE_ADD(#{endDate}, INTERVAL 1 DAY);
+		</if>
+	</select>
+	
+	
+	
+	
+	
+	
+	<update id="setUploadUpdateOk">
+    update banner
+    set imageFile = #{vo.imageFile}, photoRoute = #{vo.photoRoute}
+    where photoPosition = #{vo.photoPosition};
+	</update>
+	
+	<update id="setDbBaesongUpdate">
+    update dbBaesong set orderStatus = #{orderStu};
+	</update>
+	
+	<update id="setadminDiliveryotrStuUpdate">
+    update dbBaesong set orderStatus = #{baesongUp} where idx= #{idx};
+	</update>
+	
+	<update id="setAdminLevelUpdate">
+    update spmember set level = #{levelUp} where idx= #{idx};
+	</update>
+	
+	<update id="setAdminMessageUpdate">
+    update returns set  reMessage= #{reMessage}, returnStus=#{returnStus}  where idx= #{idx};
+	</update>
+	
+	<update id="memberClaimUpdate">
+    update returns set memberReCheck=#{value}  where idx= #{idx};
+	</update>
+	
+	<update id="setMemberCouponStuUpdate">
+    UPDATE coupons SET couponStu = 'YES' WHERE couponCode = #{coupon} AND couponMid = #{mid}
+	</update>
+	
+	
+	
+	<!-- 배송 상태 변경하셈   -->
+	<update id="setDbbaesongUpdate">
+    UPDATE dbBaesong SET orderStatus = '리뷰작성완료' WHERE oIdx = #{reviewVO.baesongoIdx};
+	</update>
+
+
+
+
+
+	<insert id="setUploadOk">
+    insert into banner (imageFile, photoPosition, photoRoute)
+    values (#{vo.imageFile}, #{vo.photoPosition}, #{vo.photoRoute});
+	</insert>
+	
+	<insert id="setAdminMainBannerTopInput">
+    insert into notice (topBanner) values (#{topBanner});
+	</insert>
+	
+	<insert id="setAdminCupon">
+	  INSERT INTO coupons (couponCode, couponName, couponAmount, expirationDate)
+	  VALUES (#{cuponVO.couponCode}, #{cuponVO.couponName}, #{cuponVO.couponAmount}, #{cuponVO.expirationDate});
+	</insert>
+	
+	<insert id="setCouponMember">
+	  INSERT INTO coupons (couponCode, couponName, couponAmount, expirationDate , couponMid)
+	  VALUES (#{cuponInsertVO.couponCode}, #{cuponInsertVO.couponName}, #{cuponInsertVO.couponAmount}, #{cuponInsertVO.expirationDate}, #{mid});
+	</insert>
+	
+	<insert id="setReviewPhoto">
+    INSERT INTO review (star, agreement1, agreement2, reviewText, freviewSAName, baesongIdx, baesongoIdx, choiceAgreement, reviewStu)
+    VALUES (#{reviewVO.star}, #{reviewVO.agreement1}, #{reviewVO.agreement2}, #{reviewVO.reviewText}, #{reviewVO.freviewSAName}, #{reviewVO.baesongIdx}, #{reviewVO.baesongoIdx}, #{reviewVO.choiceAgreement}, #{reviewVO.reviewStu});
+	</insert>
+
+		
+	
+	
+	
+	<delete id="setCouponDeleteDate">
+		DELETE FROM coupons WHERE expirationDate <![CDATA[<=]]> CURDATE();		
+	</delete>
+	
+
+	
+</mapper>
