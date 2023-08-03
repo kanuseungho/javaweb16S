@@ -9,4 +9,4 @@ public class Test {
 }
 ```
 
-[블로그 주소](https://blog.naver.com/wnmsoso9633.com)
+[블로그 주소](https://blog.naver.com/wnmsoso9633)
